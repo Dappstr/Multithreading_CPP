@@ -29,3 +29,5 @@ Threads can also be given different priorities depending on importance.
 Threads created through `std::thread` are guaranteed to be unique, however they can be reused. `std::this_thread::get_id()` to get the ID of the current thread, or `thr.get_id()` to get ther ID of the thread object.
 
 Make threads sleep by calling `sleep_for`, on the current thread through `std::this_thread::sleep_for(std::chrono::seconds(3))` or `thr.sleep_for(std::chrono::seconds(2))`
+
+Time slicing is when you have threads taking turns running for a short period of time.
