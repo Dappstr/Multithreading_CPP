@@ -1,3 +1,5 @@
+# Concurrency
+
 `std::thread` objects come from the `<thread>` library
 
 The thread constructor takes a callable object like an entry point function
@@ -20,6 +22,7 @@ int main()
 {
     S s;
     std::thread t1(&S::hello, &s);
+    //std::jthread for C++20 or later
 ```
 
 Threads may start in any order, interrupted at any time, and restarted at any time.
@@ -44,10 +47,26 @@ Cache writing is when the CPU wants to write information to the memory, which is
 
 Multiple processors means having multiple levels of a cache.
 
+
+# Cache levels
+
 Level 1 cache has private data t oeach processor core, and is as close to the processor core.
 
 Level 2 cache is private to each core
 
 Level 3 cache is shared information between all cores on the same socket.
+
+Thread exceptions must be caught in the function in which the thread is executing otherwise `std::terminate` will be thrown, causing every thread to halt causing the program to end.
+
+If the child thread detaches from the parent thread, each thread will run independently. Deatching is performed through the "detach" member function.
+
+Unless `join` is called after an exception is thrown, then the terminate function is called, stopping the program's execution.
+
+
+# Data races
+
+Data races occur when multiple threads attempt to access the same memory location, as well as at least one thread modifies it, along with potentially conflicting accesses to the same memory location.
+
+The way to fix this is to ensure thread synchronization.
 
 
