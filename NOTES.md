@@ -70,3 +70,44 @@ Data races occur when multiple threads attempt to access the same memory locatio
 The way to fix this is to ensure thread synchronization.
 
 
+# Mutexes
+
+Mutex stands for "MUTual EXclusion object"
+
+Mutexes have two states: locked and unlocked.
+
+If more than one thread are going to be accessing a function at the same time, a global mutex should be chosen over a local mutex. However, otherewise a loal mutex should be chosen.
+
+Disadvantage of using mutex is that if an exception is thrown before a `mtx.unlock` then them mutex will remain locked.
+
+
+# Internal Synchronization
+
+Multiple threads accessing the same memory location.
+
+ 
+# std::lock_guard
+
+ `std::lock_guard` is a replacement for `std::mutex` which also utilizes RAII to automatically unlock the mutex in its destructor which is a private member.
+
+It takes a mutex as an argument.
+
+
+# std::unique_lock
+
+Same basic features as std::lock_guard but is a bit slower and requires slightly more storage.
+
+Takes an optional second argument, which can be:
+    `std::try_lock` which will call the mutex's `try_lock` member function, as well as the `owns_lock` member function will check if the mutex is locked
+    
+    `std::defer_lock` which does not lock the mutex. You can lock it later by calling the `lock` member function, or by passing `std::unique_lock` to object `std::lock`
+
+    `std::adopt_lock` which takes an already locked mutex, and avoids locking the mutex twice.
+
+
+# std::shared_mutex
+
+Defined in `<shared_mutex>`
+
+It can be locked two different ways; through an **exclusive lock** or a **shared lock**. With an **exclusive lock**, no other thread may acquire a lock, and no other thread can run the critical code. However, a **shared lock** allows other threads to acquire a shared lock and threads can execute code concurrently. Exclusive locking should be preferred when writing to object such as `cout`, and shared locking should be preferred when reading to allow for concurrency.
+

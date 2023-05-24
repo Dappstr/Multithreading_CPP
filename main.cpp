@@ -1,6 +1,7 @@
 #include <string>
 #include <thread>
 #include <iostream>
+#include <mutex>
 
 using namespace std::chrono;
 
@@ -21,8 +22,12 @@ void print_odds() {
     }
 }
 
-void print(std::string str) {
+std::mutex mtx;
+
+void print(const std::string& str) {
     for (int i = 0; i < 3; ++i) {
+        //std::unique_lock<std::mutex> lock(mtx);
+        std::lock_guard<std::mutex> lock(mtx);
         std::cout << str << '\n';
     }
 }
@@ -41,9 +46,10 @@ int main() {
     std::thread dr1(print, std::string("abc"));
     std::thread dr2(print, std::string("def"));
     std::thread dr3(print, std::string("xyz"));
-
+   
     dr1.join();
     dr2.join();
     dr3.join();
+
     return 0;
 }
