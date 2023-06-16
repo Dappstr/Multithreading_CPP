@@ -1,7 +1,10 @@
+#include <memory>
 #include <string>
 #include <thread>
 #include <iostream>
 #include <mutex>
+#include <shared_mutex>
+#include <vector>
 
 using namespace std::chrono;
 
@@ -23,16 +26,66 @@ void print_odds() {
 }
 
 std::mutex mtx;
+//std::shared_mutex s_mx;
 
 void print(const std::string& str) {
     for (int i = 0; i < 3; ++i) {
         //std::unique_lock<std::mutex> lock(mtx);
+
+        //std::shared_lock<std::shared_mutex> s_lock(s_mx) <- Not recommended for writing to a shared object
+        //Shared locks and shared mutexes should be used for reader threads (threads only reading data)
+
         std::lock_guard<std::mutex> lock(mtx);
         std::cout << str << '\n';
     }
 }
 
-int main() {
+class Singleton
+{
+    public:
+        Singleton() { std::cout << "Initializing Singleton\n"; }
+
+        Singleton(const Singleton& src) = delete;
+        Singleton(Singleton&& src) = delete;
+
+        Singleton& operator=(const Singleton& src) = delete;
+        Singleton& operator=(Singleton&& src) = delete;
+
+        static Singleton& get_Singleton() {
+            static Singleton single;
+            return single;
+        }
+};
+
+void task()
+{
+    Singleton& single = Singleton::get_Singleton();
+    std::cout << &single << '\n';
+}
+
+
+class Test_class
+{
+    public:
+        Test_class() { std::cout << __FUNCTION__ << '\n';}
+
+        void func() {
+            //...
+        }
+};
+
+std::once_flag ptest_flag;
+Test_class* ptest = nullptr;
+
+//Function will only be called once even though two threads are calling it.
+void process()
+{
+    std::call_once(ptest_flag, []() { ptest = new Test_class;});
+    ptest->func();
+}
+
+int main()
+{
 
     //std::thread t1(print_evens);
     //std::thread t2(print_odds);
@@ -51,5 +104,21 @@ int main() {
     dr2.join();
     dr3.join();
 
+    std::vector<std::thread> threads {};
+
+    for(int i = 0; i < 10; ++i) {
+        threads.push_back(std::thread(task));
+    }
+
+    for(auto& i : threads) {
+        i.join();
+    }
+
+    std::thread proct1(process);
+    std::thread proct2(process);
+
+
+    proct1.join();
+    proct2.join();
     return 0;
 }
